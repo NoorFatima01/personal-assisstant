@@ -70,3 +70,16 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Tailwind or global CSS */
+@keyframes dots {
+  0%, 20% { content: '.'; }
+  40% { content: '..'; }
+  60%, 100% { content: '...'; }
+}
+
+.dot-animation::after {
+  display: inline-block;
+  content: '';
+  animation: dots 1.5s steps(3, end) infinite;
+}

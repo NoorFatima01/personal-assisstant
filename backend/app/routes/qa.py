@@ -1,36 +1,48 @@
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi import APIRouter, Depends, Request
+from fastapi.responses import JSONResponse, StreamingResponse
 from app.dependencies.auth import verify_token
-from app.schemas import QuestionRequest
-from app.services.qa_services.qa_services import StreamingRAGService
-import uuid
+from app.schemas.qa_schema import QuestionRequest
+from app.services.qa_services.streaming_rag_service import RAGService
+import json
 
 
 router = APIRouter()
-rag_service = StreamingRAGService()
+rag_service = RAGService()
 
-@router.post("/ask/stream")
-async def stream_answer(request: QuestionRequest, user_id: str = Depends(verify_token)):
-    request_id = str(uuid.uuid4())
-    question = request.question.strip()
+# non streaming endpoint
+@router.post("/ask")
+async def ask_question(question_request: QuestionRequest, user_id: str = Depends(verify_token)):
+    question = question_request.question.strip()
+    chat_id = question_request.chat_id
+    week_start = question_request.week_start
 
-    async def event_generator():
-        try:
-            async for chunk in rag_service.stream_question(question, user_id, request_id):
-                # If the client closes connection, stop streaming
-                if await request.is_disconnected():
-                    break
+    try:
+        response = await rag_service.run_question(question, user_id, chat_id, week_start)
+        return {"response": response}
+    except Exception as e:
+        print(f"Error during question answering: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e), "type": "InternalServerError"}
+        )
 
-                yield {
-                    "event": chunk["type"],
-                    "data": chunk
-                }
-        except Exception as e:
-            yield {
-                "event": "error",
-                "data": {
-                    "error": str(e),
-                    "type": "InternalServerError"
-                }
-            }
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
+# streaming endpoint
+@router.post("/ask-stream")
+async def ask_question_stream(
+    question_request: QuestionRequest,
+    user_id: str = Depends(verify_token)
+):
+    question = question_request.question.strip()
+    chat_id = question_request.chat_id
+    week_start = question_request.week_start
+
+    try:
+        stream = rag_service.run_question_streaming(question, user_id, chat_id, week_start)
+
+        return StreamingResponse(stream, media_type="text/event-stream") 
+    except Exception as e:
+        print(f"Streaming error: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e), "type": "InternalServerError"}
+        )

@@ -1,12 +1,12 @@
-// components/UploadPDF.tsx
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { pdfUploadSchema, type PDFUploadType } from "../lib/schemas";
-import { uploadPDF } from "../lib/api-client";
+import { uploadPDF } from "../utils/api-client";
 import { toast } from "react-hot-toast";
 
 // TODO: Add a size limit for the PDF files if needed
+// TODO: refactor code to prevent repeated code for each file input
 const UploadPDF: React.FC = () => {
   const {
     register,
@@ -23,6 +23,7 @@ const UploadPDF: React.FC = () => {
     formData.append("personal", data.personal[0]);
     formData.append("reflections", data.reflections[0]);
     formData.append("health", data.health[0]);
+    formData.append("week_start", data.week_start);
 
     try {
       await uploadPDF(formData);
@@ -39,6 +40,21 @@ const UploadPDF: React.FC = () => {
       <h2 className="text-xl font-semibold mb-4">Upload PDF Documents</h2>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <label
+          htmlFor="week_start"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Week Start Date
+        </label>
+        <input
+          type="date"
+          {...register("week_start")}
+          className="block w-full text-sm text-gray-700 border rounded px-3 py-2"
+        />
+        {typeof errors.week_start?.message === "string" && (
+          <p className="text-red-600 text-sm">{errors.week_start.message}</p>
+        )}
+
         <label
           htmlFor="files"
           className="block text-sm font-medium text-gray-700"
@@ -59,7 +75,7 @@ const UploadPDF: React.FC = () => {
           htmlFor="files"
           className="block text-sm font-medium text-gray-700"
         >
-          Upload health and exercise goals (PDF File) here
+          Upload personal goals (PDF File) here
         </label>
         <input
           type="file"
@@ -75,7 +91,7 @@ const UploadPDF: React.FC = () => {
           htmlFor="files"
           className="block text-sm font-medium text-gray-700"
         >
-          Upload house related chores (PDF File) here
+          Upload reflections (PDF File) here
         </label>
         <input
           type="file"

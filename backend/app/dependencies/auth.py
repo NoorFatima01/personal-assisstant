@@ -1,6 +1,6 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from app.core.config import  supabase
+from app.config.supabase_client import  supabase
 
 security = HTTPBearer()
 
@@ -14,9 +14,8 @@ async def verify_token(
         user = response.user
 
         if not user:
-            raise HTTPException(status_code=401, detail="Invalid token")
-
-        return user.id  # ✅ Return only user ID
+            raise HTTPException(status_code=403, detail="Invalid token")
+        return user.id 
 
     except Exception as e:
-        raise HTTPException(status_code=401, detail="Token verification failed.")
+        raise HTTPException(status_code=403, detail="Token verification failed.")

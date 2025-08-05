@@ -1,12 +1,16 @@
 from pydantic import BaseModel, Field, field_validator
-from typing import Dict, Any, Optional
+from typing import Dict, Any, List, Optional
 
 class AskResponse(BaseModel):
     answer: str
     source: str
 
 class QuestionRequest(BaseModel):
-    question: str = Field(..., min_length=8, max_length=350, description="The question to ask the assistant.")
+    question: str = Field(..., min_length=8, max_length=150, description="The question to ask the assistant.")
+    chat_id: str = Field(..., description="Unique identifier for the chat session.")
+    week_start: List[str] = Field(
+        default=None, description="Week start date for context, if applicable."
+    )
 
     @field_validator('question')
     def validate_question(cls, value):

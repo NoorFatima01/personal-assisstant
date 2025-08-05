@@ -1,6 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import user
+from app.routes.user import router as user_router
+from app.routes.doc import router as doc_router
+from app.routes.qa import router as qa_router
+from app.routes.user import router as user_router
+
 from app.utils.exception import http_exception_handler
 from app.utils.exception import rag_exception_handler, RAGException
 
@@ -20,11 +24,12 @@ async def health_check():
     return {"status": "healthy"}
 
 # Routers
-app.include_router(user.router, prefix="/auth", tags=["Auth"])
-# app.include_router(data.router, prefix="/data", tags=["Data"])
-# app.include_router(public.router, tags=["Public"])
+app.include_router(user_router, prefix="/api/users", tags=["Users"])
+app.include_router(user_router, prefix="/api/auth", tags=["Auth"])
+app.include_router(doc_router, prefix="/api/docs", tags=["Docs"])
+app.include_router(qa_router, prefix="/api/qa", tags=["QA"])
 
 # Error handling
-app.add_exception_handler(Exception, http_exception_handler)
+app.add_exception_handler(HTTPException, http_exception_handler)
 app.add_exception_handler(RAGException, rag_exception_handler)
 

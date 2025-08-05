@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/auth-context";
 import toast from "react-hot-toast";
 
@@ -9,6 +10,7 @@ const Login = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const { signIn, signUp } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
@@ -24,6 +26,9 @@ const Login = () => {
         toast.success(
           "Your account has been created successfully! Please sign in."
         );
+      } else if(!isSignUp) {
+        toast.success("You have signed in successfully!");
+        navigate("/");
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
