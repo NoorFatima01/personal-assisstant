@@ -1,5 +1,5 @@
-import React from 'react'
-import { useAuth } from '../context/auth-context'
+import React from "react";
+import { useAuth } from "../context/auth-context";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const { user, signOut } = useAuth();
@@ -24,12 +24,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             {/* User Info & Sign Out */}
             {user && (
               <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-700">
-                  {user.email}
-                </span>
+                <span className="text-sm text-gray-700">{user.email}</span>
                 <button
                   onClick={handleSignOut}
-                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out"
+                  className="bg-red-600 hover:bg-red-700 cursor-pointer text-white px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out"
                 >
                   Sign Out
                 </button>
@@ -41,12 +39,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          {children}
-        </div>
+        <div className="px-4 py-6 sm:px-0">{children}</div>
       </main>
     </div>
-  )
-}
+  );
+};
 
-export default Layout
+export default Layout;

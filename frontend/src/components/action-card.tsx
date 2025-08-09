@@ -60,20 +60,6 @@ const ActionCard = () => {
           <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-200"></div>
         </Link>
       </div>
-
-      {/* Quick Stats */}
-      <div className="mt-8 pt-6 border-t border-gray-200">
-        <div className="grid grid-cols-2 gap-4 text-center">
-          <div className="p-3 bg-blue-50 rounded-lg">
-            <div className="text-2xl font-bold text-blue-600">12</div>
-            <div className="text-xs text-gray-600">Total Chats</div>
-          </div>
-          <div className="p-3 bg-green-50 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">5</div>
-            <div className="text-xs text-gray-600">Documents</div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

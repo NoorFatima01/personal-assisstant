@@ -1,4 +1,3 @@
-
 const DashboardHeader = ({ email }: { email: string }) => {
   return (
     <div className="bg-white border-b border-gray-200">

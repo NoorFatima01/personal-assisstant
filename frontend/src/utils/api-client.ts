@@ -4,7 +4,7 @@ import { type ChatType, type ProfileType } from "../lib/schemas";
 
 const baseURL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-export const getUserProfile= async (): Promise<ProfileType> => {
+export const getUserProfile = async (): Promise<ProfileType> => {
   try {
     const {
       data: { session },
@@ -70,9 +70,9 @@ export async function fetchLLMResponseStream({
   question: string;
   weeks: string[];
   chatId: string;
-  onToken: (token: string) => void;  // Called as each token arrives
-  onDone?: () => void;               // Optional: called after stream ends
-  onError?: (err: Error) => void;    // Optional: error handling
+  onToken: (token: string) => void; // Called as each token arrives
+  onDone?: () => void; // Optional: called after stream ends
+  onError?: (err: Error) => void; // Optional: error handling
   abortController?: AbortController; // Optional: to cancel the request
 }) {
   try {
@@ -83,7 +83,10 @@ export async function fetchLLMResponseStream({
     if (!session?.access_token) {
       throw new Error("No authentication token found");
     }
-    console.log("Fetching LLM response stream with token:", session.access_token);
+    console.log(
+      "Fetching LLM response stream with token:",
+      session.access_token
+    );
 
     const response = await fetch(`${baseURL}/api/qa/ask-stream`, {
       method: "POST",

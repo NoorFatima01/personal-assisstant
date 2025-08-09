@@ -13,10 +13,15 @@ export const ProfileSchema = z.object({
   email: z.email(),
   firstname: z.string().min(2).max(100),
   lastname: z.string().min(2).max(100),
-  weeks: z.array(z.string().min(1).refine(
-  (dateString) => !isNaN(Date.parse(dateString)),
-  "Invalid date format. Please provide a valid date."
-  )),
+  weeks: z.array(
+    z
+      .string()
+      .min(1)
+      .refine(
+        (dateString) => !isNaN(Date.parse(dateString)),
+        "Invalid date format. Please provide a valid date."
+      )
+  ),
   created_at: z.iso.datetime(),
 });
 export type ProfileType = z.infer<typeof ProfileSchema>;
@@ -76,7 +81,6 @@ export const pdfUploadSchema = z.object({
 });
 export type PDFUploadType = z.infer<typeof pdfUploadSchema>;
 
-
 export const chatInputFormSchema = z.object({
   question: z.string().min(1, "Question is required"),
   weeks: z.array(z.string()).min(1, "At least one week must be selected"),
@@ -89,10 +93,14 @@ export const ChatSchema = z.object({
   updated_at: z.date(),
   user_id: z.uuid(),
   messages_count: z.number().min(0),
-  messages: z.array(z.object({
-    user_input: z.string().min(1),
-    assistant_response: z.string().min(1),
-  })).min(1),
+  messages: z
+    .array(
+      z.object({
+        user_input: z.string().min(1),
+        assistant_response: z.string().min(1),
+      })
+    )
+    .min(1),
   status: z.enum(["active", "complete"]),
 });
 

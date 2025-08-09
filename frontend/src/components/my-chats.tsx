@@ -1,28 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { fetchUserChats } from "../utils/api-client";
 import { type ChatType } from "../lib/schemas";
 import { Link } from "react-router-dom";
 import Loader from "./loader";
+import { useUserChats } from "../hooks/use-user-chats";
 
 const MyChats = ({ userId }: { userId: string }) => {
-  const [userChats, setUserChats] = useState<ChatType[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchChats = async () => {
-      setIsLoading(true);
-      try {
-        const chats = await fetchUserChats();
-        setUserChats(chats);
-      } catch (error) {
-        console.error("Error fetching user chats:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchChats();
-  }, [userId]);
+  const { userChats, isLoading } = useUserChats(userId);
 
   if (isLoading) {
     return <Loader />;

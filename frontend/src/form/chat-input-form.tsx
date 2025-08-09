@@ -1,22 +1,18 @@
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { chatInputFormSchema, type ChatInputFormType } from "../lib/schemas";
+import { type ChatInputFormProps, type ChatInputFormData } from "../lib/types";
+import { sortWeeks } from "../utils/chat-utils";
 import { validateChatInput } from "../utils/chat-utils";
-import { handleWeekChange } from "../utils/chat-utils";
+import { chatInputFormSchema } from "../lib/schemas";
+import WeekSelector from "../components/week-selector";
 
-type ChatInputFormProps = {
-  weeks: string[];
-  loading: boolean;
-  onSend: (input: string, weeks: string[]) => void;
-  isStreaming: boolean;
-};
-
-const ChatInputForm = ({
+const ChatInputForm: React.FC<ChatInputFormProps> = ({
   weeks,
   loading,
   onSend,
   isStreaming,
-}: ChatInputFormProps) => {
+}) => {
   const {
     register,
     handleSubmit,
@@ -24,93 +20,117 @@ const ChatInputForm = ({
     reset,
     setValue,
     watch,
-  } = useForm<ChatInputFormType>({
+  } = useForm<ChatInputFormData>({
     resolver: zodResolver(chatInputFormSchema),
     defaultValues: {
       weeks: [],
+      question: "",
     },
   });
 
   const selectedWeeks = watch("weeks") || [];
+  const question = watch("question") || "";
 
-  const onSubmit = (data: ChatInputFormType) => {
+  const onSubmit = (data: ChatInputFormData) => {
     if (!validateChatInput(data)) return;
-    const sortedWeeks = [...data.weeks].sort(
-      (a, b) => new Date(b).getTime() - new Date(a).getTime()
-    );
+    const sortedWeeks = sortWeeks(data.weeks);
     onSend(data.question, sortedWeeks);
     reset();
   };
 
-  console.log("Weeks are: ", weeks);
+  const isDisabled = loading || isSubmitting;
 
   return (
-    <div className="space-y-4">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Question Input */}
-        <div>
-          <input
-            className="w-full border rounded px-3 py-2"
-            placeholder="Ask me anything..."
-            {...register("question")}
-            disabled={loading}
-          />
+        <div className="space-y-2">
+          <label
+            htmlFor="question"
+            className="block text-sm font-semibold text-gray-700"
+          >
+            Your Question
+          </label>
+          <div className="relative">
+            <textarea
+              id="question"
+              rows={3}
+              className={`
+                w-full px-4 py-3 border-2 rounded-lg resize-none transition-all duration-200
+                focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                ${
+                  errors.question
+                    ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                    : "border-gray-300"
+                }
+                ${isDisabled ? "bg-gray-50 cursor-not-allowed" : "bg-white"}
+              `}
+              placeholder="Ask me anything about your selected weeks..."
+              {...register("question")}
+              disabled={isDisabled}
+            />
+            <div className="absolute bottom-2 right-2 text-xs text-gray-400">
+              {question.length}/500
+            </div>
+          </div>
           {errors.question && (
-            <p className="text-red-500 text-sm mt-1">
+            <p className="text-red-500 text-sm mt-1 flex items-center">
+              <svg
+                className="w-4 h-4 mr-1"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
               {errors.question.message}
             </p>
           )}
         </div>
 
         {/* Week Selection */}
-        <div>
-          <label className="block text-sm font-medium mb-2">
-            Select Weeks:
-          </label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-            {weeks.map((week) => (
-              <label
-                key={week}
-                className="flex items-center space-x-2 cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedWeeks.includes(week)}
-                  onChange={(e) =>
-                    handleWeekChange(
-                      week,
-                      e.target.checked,
-                      selectedWeeks,
-                      setValue
-                    )
-                  }
-                  disabled={loading}
-                  className="rounded"
-                />
-                <span className="text-sm">{week}</span>
-              </label>
-            ))}
-          </div>
-          {errors.weeks && (
-            <p className="text-red-500 text-sm mt-1">{errors.weeks.message}</p>
-          )}
-        </div>
+        <WeekSelector
+          weeks={weeks}
+          selectedWeeks={selectedWeeks}
+          setValue={setValue}
+          error={Array.isArray(errors.weeks) ? errors.weeks[0] : errors.weeks}
+          disabled={isDisabled}
+        />
 
-        {/* Selected weeks display */}
-        {selectedWeeks.length > 0 && (
-          <div className="text-sm text-gray-600">
-            Selected: {selectedWeeks.join(", ")}
+        {/* Streaming Indicator */}
+        {isStreaming && (
+          <div className="flex items-center space-x-2 text-blue-600">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+            <span className="text-sm font-medium">
+              Processing your request...
+            </span>
           </div>
         )}
-        {isStreaming && <span className="animate-pulse">...</span>}
 
         {/* Submit Button */}
         <button
           type="submit"
-          disabled={loading || isSubmitting}
-          className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white px-4 py-2 rounded"
+          disabled={isDisabled}
+          className={`
+            w-full py-3 px-6 rounded-lg font-semibold text-white transition-all duration-200
+            ${
+              isDisabled
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700 focus:ring-2 cursor-pointer focus:ring-blue-500 focus:ring-offset-2"
+            }
+          `}
         >
-          {loading || isSubmitting ? "Submitting..." : "Submit"}
+          {loading || isSubmitting ? (
+            <div className="flex items-center justify-center space-x-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              <span>Processing...</span>
+            </div>
+          ) : (
+            "Send Message"
+          )}
         </button>
       </form>
     </div>
