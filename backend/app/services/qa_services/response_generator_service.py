@@ -15,25 +15,17 @@ class ResponseGenerator:
         self.user_id = user_id
         self.chat_id = chat_id
         self.chat_service = chat_service
-        self.chat_history = self.chat_service.get_or_create_chat_session(chat_id, user_id).get("messages", [])
-        print(f"Initialized ResponseGenerator with chat_id: {chat_id}, user_id: {user_id}")
 
     def _generate_response(self, inputs):
         try:
             question = inputs["question"]
             context = inputs["context"]
 
-
+            chat_history = self.chat_service.get_or_create_chat_session(self.chat_id, self.user_id).get("messages", [])
             # Format chat history (you may need to adjust based on your prompt)
             formatted_history = "\n".join(
-                [f"User: {msg['user_input']}\nAssistant: {msg['assistant_response']}" for msg in self.chat_history[-10:]]
+                [f"User: {msg['user_input']}\nAssistant: {msg['assistant_response']}" for msg in chat_history[-10:]]
             )
-
-            print(self.prompt_template.format(
-                question=question,
-                context=context,
-                chat_history=formatted_history
-            ))
 
             # Proper chain
             chain = self.prompt_template | self.llm | StrOutputParser()
@@ -44,8 +36,6 @@ class ResponseGenerator:
                 "chat_history": formatted_history
             })
 
-            print(f"Generated response: {response}")    
-
             # Save the response to the chat history
             self.chat_service.update_chat_session(self.chat_id, [{"user_input": question, "assistant_response": response}])
             return response
@@ -54,5 +44,4 @@ class ResponseGenerator:
             return "I'm sorry, something went wrong while generating the response."
 
     def as_runnable(self):
-        print("Creating ResponseGenerator runnable")
         return RunnableLambda(self._generate_response)

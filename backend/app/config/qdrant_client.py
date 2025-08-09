@@ -5,6 +5,9 @@ from langchain_community.vectorstores import Qdrant as QdrantStore
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from qdrant_client.models import VectorParams
 from qdrant_client.models import PayloadSchemaType
+from qdrant_client.models import OptimizersConfigDiff
+from qdrant_client.http.models import PayloadSchemaType 
+
 
 load_dotenv()
 
@@ -27,14 +30,10 @@ def check_index_exists(client: QdrantClient, collection_name: str, field_name: s
     """Check if an index exists for a given field in the collection."""
     try:
         collection_info = client.get_collection(collection_name)
-
-        # Check payload schema for the field
+        
         if hasattr(collection_info, 'payload_schema') and collection_info.payload_schema:
-            # payload_schema is a dict where keys are field names
             exists = field_name in collection_info.payload_schema
-            print(f"Index check for '{field_name}': {'EXISTS' if exists else 'NOT FOUND'}")
             return exists
-
         return False
         
     except Exception as e:
@@ -42,38 +41,52 @@ def check_index_exists(client: QdrantClient, collection_name: str, field_name: s
         return False
 
 def setup_qdrant_index(client: QdrantClient, collection_name: str):
-    """Create index for file_type metadata field"""
+    """Create indexes for nested metadata fields"""
     try:
-        required_indexes = ["file_type", "week_start"]
+        # Use the correct nested field names
+        required_indexes = ["metadata.file_type", "metadata.week_start"]
+
         for field_name in required_indexes:
             if not check_index_exists(client, collection_name, field_name):
-                client.create_payload_index(collection_name, field_name=field_name, field_schema=PayloadSchemaType.KEYWORD)
-                print(f"Created index for '{field_name}' field in collection '{collection_name}'")
+                client.create_payload_index(
+                    collection_name=collection_name,
+                    field_name=field_name, 
+                    field_schema=PayloadSchemaType.KEYWORD,
+                    wait=True
+                )
+            else:
+                # Index already exists, no action needed
+                pass
 
     except Exception as e:
-        print(f"Error creating index: {e}")
-        # Index might already exist, which is fine
         if "already exists" not in str(e).lower():
             raise
 
-# Helper function to get vectorstore
 def get_user_vector_store(user_id: str) -> QdrantStore:
     collection_name = f"user_{user_id}_docs"
 
     try:
-        collection_info = qdrant_client.get_collection(collection_name)
-        print(f"Collection {collection_name} already exists.")
-        print(f"Collection info: {collection_info}")
-    except Exception as e:
-        print(f"Collection {collection_name} does not exist, creating it.")
+        qdrant_client.get_collection(collection_name)
+
+    except Exception as e:        
+        # Create collection
         qdrant_client.create_collection(
             collection_name=collection_name,
             vectors_config=VectorParams(
                 size=384,
-                distance="Cosine",
+                distance="Cosine"
+            ),
+            optimizers_config=OptimizersConfigDiff(
+                deleted_threshold=0.2,
+                vacuum_min_vector_number=100,
+                default_segment_number=0,
+                indexing_threshold=4,
+                flush_interval_sec=5
             )
         )
-        setup_qdrant_index(qdrant_client, collection_name)
+    
+    # Always setup indexes (for both new and existing collections)
+    setup_qdrant_index(qdrant_client, collection_name)
 
     return QdrantStore(
         client=qdrant_client,

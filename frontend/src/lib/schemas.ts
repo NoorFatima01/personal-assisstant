@@ -1,12 +1,25 @@
-import {  z } from "zod";
+import { z } from "zod";
 
 export const UserSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   email: z.email(),
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
 });
 export type UserType = z.infer<typeof UserSchema>;
+
+export const ProfileSchema = z.object({
+  id: z.uuid(),
+  email: z.email(),
+  firstname: z.string().min(2).max(100),
+  lastname: z.string().min(2).max(100),
+  weeks: z.array(z.string().min(1).refine(
+  (dateString) => !isNaN(Date.parse(dateString)),
+  "Invalid date format. Please provide a valid date."
+  )),
+  created_at: z.iso.datetime(),
+});
+export type ProfileType = z.infer<typeof ProfileSchema>;
 
 export const pdfUploadSchema = z.object({
   week_start: z
@@ -69,3 +82,18 @@ export const chatInputFormSchema = z.object({
   weeks: z.array(z.string()).min(1, "At least one week must be selected"),
 });
 export type ChatInputFormType = z.infer<typeof chatInputFormSchema>;
+
+export const ChatSchema = z.object({
+  id: z.uuid(),
+  created_at: z.date(),
+  updated_at: z.date(),
+  user_id: z.uuid(),
+  messages_count: z.number().min(0),
+  messages: z.array(z.object({
+    user_input: z.string().min(1),
+    assistant_response: z.string().min(1),
+  })).min(1),
+  status: z.enum(["active", "complete"]),
+});
+
+export type ChatType = z.infer<typeof ChatSchema>;

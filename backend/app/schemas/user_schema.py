@@ -9,3 +9,7 @@ class UserProfile(BaseModel):
     created_at: str
     weeks: Optional[list[str]] = None
 
+class UserProfileResponse(BaseModel):
+    data: UserProfile
+    message: str
+    status: str

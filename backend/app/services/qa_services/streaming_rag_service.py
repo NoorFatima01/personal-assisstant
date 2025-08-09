@@ -9,9 +9,10 @@ from app.utils.exception import RetrievalException, RAGException, GenerationExce
 from .question_classifier_service import QuestionClassifier
 from .retrieval_engine_service import RetrievalEngine
 from .response_generator_service import ResponseGenerator
-from app.utils.doc_utils import format_sse
 from app.config.model_loader import get_llm_manager
 from app.services.chat_services.chat_db_service import ChatDBService
+from app.utils.redis_cache import RedisCache
+from app.config.redis_client import redis_client
 
 
 #  TODO: change this incorporate multiple classification categories
@@ -38,42 +39,21 @@ class RAGService:
     
     def __init__(self):
         self.config = RAGConfig()
-        
-        # Cache for streaming chains
-        self.chain_cache: Dict[Tuple[str, str], Tuple[Any, float]] = {} 
-        self.vectorstore_cache: Dict[str, Tuple[Any, float]] = {}
+        self.redis_cache = RedisCache(redis_client)
         
         # Stats tracking
-        self.stats = {
-            "active_streams": 0,
-            "total_streamed": 0,
-            "total_chunks_sent": 0
-        }
-
-    def _get_cached_vectorstore(self, user_id: str):
-        """Get cached vectorstore or create new one"""
-        if user_id in self.vectorstore_cache:
-            vectorstore, timestamp = self.vectorstore_cache[user_id]
-            if time.time() - timestamp < self.config.cache_ttl:
-                return vectorstore
-            else:
-                del self.vectorstore_cache[user_id]
-        # If not cached, create a new vectorstore
-        vectorstore = get_user_vector_store(user_id)
-        if vectorstore is None:
-            raise RetrievalException(f"No vector store found for user {user_id}")
-
-        self.vectorstore_cache[user_id] = (vectorstore, time.time())
-        return vectorstore
+        # self.stats = {
+        #     "active_streams": 0,
+        #     "total_streamed": 0,
+        #     "total_chunks_sent": 0
+        # }
 
     def _build_sync_chain(self, user_id: str, chat_id: str, week_start: List[str]):
         """Build a sync Runnable chain for non-streaming chat"""
         try:
             chat_service = ChatDBService()
-            vectorstore = self._get_cached_vectorstore(user_id)
+            vectorstore = get_user_vector_store(user_id)
 
-            print(f"Building sync chain for user, chat, week_start {week_start}")
-            
             llm_manager = get_llm_manager()
             shared_llm = llm_manager.shared_llm
             classifier = QuestionClassifier(shared_llm, self.config.classification_prompt)
@@ -95,40 +75,12 @@ class RAGService:
             print("Error building sync chain:", e)
             raise
 
-
-    def _get_cached_chain(self, user_id: str, chat_id: str, week_start: List[str]):
-        if (user_id, chat_id) in self.chain_cache:
-            chain, timestamp = self.chain_cache[(user_id, chat_id)]
-            if time.time() - timestamp < self.config.cache_ttl:
-                return chain
-            else:
-                del self.chain_cache[(user_id, chat_id)]
-
-        chain = self._build_sync_chain(user_id, chat_id, week_start)
-        self.chain_cache[(user_id, chat_id)] = (chain, time.time())
-        return chain
-
-    async def run_question(self, question: str, user_id: str, chat_id: str, week_start: List[str]) -> str:
-        """Process a question synchronously (non-streaming)"""
-        try:
-            print(f"Running sync RAG for user {user_id}, chat {chat_id}")
-            chain = self._get_cached_chain(user_id, chat_id, week_start)
-            response = await chain.ainvoke({
-                "question": question,
-                "week_start": week_start
-            })
-            return response
-        except Exception as e:
-            print(f"Error during non-streaming RAG processing: {str(e)}")
-            return "Something went wrong. Please try again later."
-        
     async def run_question_streaming(
         self, question: str, user_id: str, chat_id: str, week_start: List[str]
     ) -> AsyncGenerator[str, None]:
         """Stream response chunks as Server-Sent Events"""
         try:
-            print(f"Streaming RAG for user {user_id}, chat {chat_id}")
-            chain = self._get_cached_chain(user_id, chat_id, week_start)
+            chain = self._build_sync_chain(user_id, chat_id, week_start)
 
             async for chunk in chain.astream({
                 "question": question,
@@ -150,22 +102,29 @@ class RAGService:
             yield f"data: Something went wrong during streaming.\n\n"
 
 
-    def clear_user_cache(self, user_id: str) -> bool:
-        """Clear cache for a specific user"""
-        cleared = False
-        
-        if user_id in self.chain_cache:
-            del self.chain_cache[user_id]
-            cleared = True
-            
-        if user_id in self.vectorstore_cache:
-            del self.vectorstore_cache[user_id]
-            cleared = True
-        return cleared
 
-    def clear_all_cache(self) -> int:
-        """Clear all streaming caches"""
-        total_count = len(self.chain_cache) + len(self.vectorstore_cache)
-        self.chain_cache.clear()
-        self.vectorstore_cache.clear()
-        return total_count
+
+    # async def run_question(self, question: str, user_id: str, chat_id: str, week_start: List[str]) -> str:
+    #     """Process a question synchronously (non-streaming)"""
+    #     try:
+    #         print(f"Running sync RAG for user {user_id}, chat {chat_id}")
+    #         chain = self._get_cached_chain(user_id, chat_id, week_start)
+    #         response = await chain.ainvoke({
+    #             "question": question,
+    #             "week_start": week_start
+    #         })
+    #         return response
+    #     except Exception as e:
+    #         print(f"Error during non-streaming RAG processing: {str(e)}")
+    #         return "Something went wrong. Please try again later."
+
+
+    # def _get_cached_chain(self, user_id: str, chat_id: str, week_start: List[str]):
+    #     chain_key = self.redis_cache.make_key("chain", user_id, chat_id)
+    #     chain = self.redis_cache.get(chain_key)
+    #     if chain:
+    #         return chain
+    #     # If not cached, build the chain
+    #     chain = self._build_sync_chain(user_id, chat_id, week_start)
+    #     self.redis_cache.set_pickle(chain_key, chain, ttl=self.config.cache_ttl)
+    #     return chain

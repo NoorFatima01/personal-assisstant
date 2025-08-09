@@ -4,6 +4,7 @@ from app.routes.user import router as user_router
 from app.routes.doc import router as doc_router
 from app.routes.qa import router as qa_router
 from app.routes.user import router as user_router
+from app.routes.chat import router as chat_router
 
 from app.utils.exception import http_exception_handler
 from app.utils.exception import rag_exception_handler, RAGException
@@ -28,6 +29,7 @@ app.include_router(user_router, prefix="/api/users", tags=["Users"])
 app.include_router(user_router, prefix="/api/auth", tags=["Auth"])
 app.include_router(doc_router, prefix="/api/docs", tags=["Docs"])
 app.include_router(qa_router, prefix="/api/qa", tags=["QA"])
+app.include_router(chat_router, prefix="/api/chat", tags=["Chat"])
 
 # Error handling
 app.add_exception_handler(HTTPException, http_exception_handler)

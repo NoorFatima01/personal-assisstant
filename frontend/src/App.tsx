@@ -4,9 +4,10 @@ import { BrowserRouter } from "react-router-dom";
 import { Route, Routes, Navigate } from "react-router";
 import { Toaster } from "react-hot-toast";
 import Login from "./components/login";
-import Dashboard from "./components/dashboard";
+import Dashboard from "./pages/dashboard";
 import UploadDocPage from "./pages/upload-doc-page";
 import Chat from "./pages/chat";
+import Layout from "./layout/layout";
 
 const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({
   element,
@@ -23,7 +24,7 @@ const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {user ? element : <Navigate to="/login" replace />}
+      {user ? <Layout>{element}</Layout> : <Navigate to="/login" replace />}
     </div>
   );
 };

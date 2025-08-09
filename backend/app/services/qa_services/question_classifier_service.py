@@ -17,9 +17,6 @@ class QuestionClassifier:
         """Debug wrapper for classification"""
 
         try:
-            # Format the prompt first to see what's being sent
-            # formatted_messages = self.classification_prompt.format_messages({"question": question})
-
             # Get LLM response
             llm_response = self.chain.invoke({"question": question})
 
@@ -28,7 +25,6 @@ class QuestionClassifier:
             cleaned_response = llm_response.content.strip() if hasattr(llm_response, 'content') else str(llm_response).strip()
 
             if cleaned_response not in valid_cats and cleaned_response.lower() not in valid_cats:
-                print(f"Invalid classification '{cleaned_response}', defaulting to 'personal'")
                 cleaned_response = "personal"
 
             return cleaned_response
@@ -36,10 +32,7 @@ class QuestionClassifier:
         except Exception as e:
             print(f"Classification error: {str(e)}")
             print(f"Exception type: {type(e)}")
-            import traceback
-            traceback.print_exc()
             return "personal"  # fallback
 
     def as_runnable(self):
-        print("Creating QuestionClassifier runnable")
         return RunnableLambda(self._classify)

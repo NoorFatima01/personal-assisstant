@@ -37,3 +37,8 @@ class UserDBService:
             weeks.append(newWeek)
         response = self.supabase.table(self.table_name).update({"weeks": weeks}).eq("id", user_id).execute()
         return response.data
+
+    def get_all_users(self) -> list:
+        """Get all users"""
+        response = self.supabase.table(self.table_name).select("*").execute()
+        return response.data if response.data else []

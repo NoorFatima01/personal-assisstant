@@ -8,8 +8,6 @@ class DocUploadRequest(BaseModel):
     def validate_week_start(cls, v):
         if not v:
             raise ValueError("week_start must be provided")
-        if not isinstance(v, str):
-            raise ValueError("week_start must be a string")
         return v
 
 

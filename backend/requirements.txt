@@ -10,3 +10,4 @@ transformers
 torch
 pypdf
 qdrant-client
+redis

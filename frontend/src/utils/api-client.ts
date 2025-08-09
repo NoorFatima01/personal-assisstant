@@ -1,9 +1,10 @@
 import axios from "axios";
 import { supabase } from "../lib/supabase";
+import { type ChatType, type ProfileType } from "../lib/schemas";
 
 const baseURL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-export const getUserProfile = async () => {
+export const getUserProfile= async (): Promise<ProfileType> => {
   try {
     const {
       data: { session },
@@ -13,15 +14,15 @@ export const getUserProfile = async () => {
       throw new Error("No authentication token found");
     }
 
-    console.log("Fetching user profile with token:", session.access_token);
-
     const response = await axios.get(`${baseURL}/api/users/me`, {
       headers: {
         Authorization: `Bearer ${session.access_token}`,
       },
     });
 
-    return response.data;
+    console.log("Fetched user profile:", response.data);
+
+    return response.data.data;
   } catch (error) {
     console.error("Failed to fetch user profile:", error);
     throw error;
@@ -130,4 +131,55 @@ export async function fetchLLMResponseStream({
   }
 }
 
+export async function fetchUserChats() {
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
+    if (!session?.access_token) {
+      throw new Error("No authentication token found");
+    }
+
+    const response = await axios.get(`${baseURL}/api/chat/my-chats`, {
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
+
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to fetch user chats:", error);
+    throw error;
+  }
+}
+
+export async function fetchChatSession({
+  chatId,
+}: {
+  chatId: string;
+}): Promise<ChatType | []> {
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session?.access_token) {
+      throw new Error("No authentication token found");
+    }
+
+    const response = await axios.get(`${baseURL}/api/chat/my-chats/${chatId}`, {
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    });
+
+    if (response.data.data) {
+      return response.data.data;
+    }
+    return [];
+  } catch (error) {
+    console.error("Failed to fetch chat session:", error);
+    throw error;
+  }
+}

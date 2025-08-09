@@ -34,7 +34,6 @@ const ChatInputForm = ({
   const selectedWeeks = watch("weeks") || [];
 
   const onSubmit = (data: ChatInputFormType) => {
-    console.log("Form data:", data);
     if (!validateChatInput(data)) return;
     const sortedWeeks = [...data.weeks].sort(
       (a, b) => new Date(b).getTime() - new Date(a).getTime()
@@ -42,6 +41,8 @@ const ChatInputForm = ({
     onSend(data.question, sortedWeeks);
     reset();
   };
+
+  console.log("Weeks are: ", weeks);
 
   return (
     <div className="space-y-4">

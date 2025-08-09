@@ -2,6 +2,7 @@ import { toast } from "react-hot-toast/headless";
 import type { ChatInputFormType } from "../lib/schemas";
 import type { UseFormSetValue } from "react-hook-form";
 
+
 export const handleWeekChange = (
   week: string,
   checked: boolean,
@@ -28,3 +29,5 @@ export const validateChatInput = (data: ChatInputFormType) => {
   }
   return true;
 };
+
+
