@@ -8,7 +8,7 @@ The app uses **LangChain** and **RAG (Retrieval-Augmented Generation)** to fetch
 **Key Features:**
 - 📂 Upload **4 weekly schedule PDFs** (Work Goals, Personal Goals, Health Goals).
 - 💬 Chat with an **LLM** about your goals and schedules.
-- 🔍 **Vector search** with **Qdrant** for relevant context retrieval.
+- 🔍 **Filtered Vector search** with (based on week and question type) **Qdrant** for relevant context retrieval.
 - ⚡ Real-time answers via **Server-Sent Events (SSE)** streaming.
 - 🛠️ **Background jobs** with **Celery** for heavy tasks.
 - ⏰ **Cron jobs** (Celery Beat) for scheduled tasks.
@@ -57,7 +57,7 @@ cd week-plan-chat
 # Backend setup
 cd backend
 pip install -r requirements.txt
-uvicorn app.main:app --reload
+uvicorn app.main:app --reload --reload-dir app
 
 #running celery
 celery -A app.config.celery_app.celery_app worker --loglevel=info

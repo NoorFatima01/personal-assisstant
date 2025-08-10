@@ -1,5 +1,3 @@
-import React from "react";
-
 const UploadHeader = () => {
   return (
     <div className="text-center mb-8">

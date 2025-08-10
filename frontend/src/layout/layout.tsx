@@ -1,5 +1,7 @@
 import React from "react";
 import { useAuth } from "../context/auth-context";
+import { Link } from "react-router";
+import logo from "../assets/plan.png";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const { user, signOut } = useAuth();
@@ -16,9 +18,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <div className="flex justify-between items-center h-16">
             {/* Logo/Brand */}
             <div className="flex-shrink-0">
-              <h1 className="text-xl font-semibold text-gray-900">
-                Personal Assistant
-              </h1>
+              <Link to="/" className="text-xl font-semibold text-gray-900 flex items-center">
+                <img src={logo} alt="Logo" className="h-8" />
+                <span className="ml-2">Week Plan Chat</span>
+              </Link>
             </div>
 
             {/* User Info & Sign Out */}

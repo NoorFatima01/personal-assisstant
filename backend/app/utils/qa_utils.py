@@ -1,23 +1,40 @@
 from qdrant_client.http.models import Filter, FieldCondition, MatchValue, MatchAny
 
-def create_search_filter(classification: str, week_start=None):
-
-    if not classification or classification.strip() == "":
-        classification = "personal"
+def create_search_filter(classification, week_start=None):
+    # Normalize classification to list
+    if not classification:
+        classification = ["personal"]
+    elif isinstance(classification, str):
+        classification = [classification] if classification.strip() else ["personal"]
+    elif isinstance(classification, list) and not classification:
+        classification = ["personal"]
     
-    # Handle case where classification might be a list
-    if isinstance(classification, list):
-        classification = classification[0] if classification else "personal"
+    # Clean up classification list
+    classification = [cat.strip() for cat in classification if cat and cat.strip()]
+    if not classification:
+        classification = ["personal"]
     
-    # LangChain's QdrantStore expects qdrant_client.http.models.Filter objects
-    conditions = [
-        FieldCondition(
-            key="metadata.file_type",
-            match=MatchValue(value=classification)
+    conditions = []
+    
+    # Handling multiple classifications with OR logic
+    if len(classification) == 1:
+        # Single classification
+        conditions.append(
+            FieldCondition(
+                key="metadata.file_type",
+                match=MatchValue(value=classification[0])
+            )
         )
-    ]
+    else:
+        # Multiple classifications - MatchAny for OR logic
+        conditions.append(
+            FieldCondition(
+                key="metadata.file_type",
+                match=MatchAny(any=classification)
+            )
+        )
 
-    
+    # Handle week_start filter
     if week_start:
         if isinstance(week_start, list):
             # Filter for documents where week_start is any of the values in the list
@@ -37,4 +54,5 @@ def create_search_filter(classification: str, week_start=None):
                 )
             )
     
-    return Filter(must=conditions)
+    filter = Filter(must=conditions)
+    return filter

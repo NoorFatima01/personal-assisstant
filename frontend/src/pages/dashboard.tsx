@@ -4,8 +4,13 @@ import Loader from "../components/loader";
 import DashboardHeader from "../components/dashboard-header";
 import WelcomeSection from "../components/welcome-section";
 import ActionCard from "../components/action-card";
+import { useEffect } from "react";
 
 const Dashboard = () => {
+  useEffect(() => {
+    window.document.title = "Chat Week Plan | Dashboard";
+  }, []);
+
   const { user } = useAuth();
 
   if (!user) {

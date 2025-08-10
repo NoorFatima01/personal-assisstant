@@ -3,11 +3,12 @@ import { AuthProvider, useAuth } from "./context/auth-context";
 import { BrowserRouter } from "react-router-dom";
 import { Route, Routes, Navigate } from "react-router";
 import { Toaster } from "react-hot-toast";
-import Login from "./components/login";
+import Login from "./pages/login";
 import Dashboard from "./pages/dashboard";
 import UploadDocPage from "./pages/upload-doc-page";
 import Chat from "./pages/chat";
 import Layout from "./layout/layout";
+import Loader from "./components/loader";
 
 const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({
   element,
@@ -17,7 +18,7 @@ const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="text-lg">Loading...</div>
+        <Loader />
       </div>
     );
   }

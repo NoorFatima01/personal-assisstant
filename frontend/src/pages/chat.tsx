@@ -1,5 +1,5 @@
 // components/Chat.tsx
-import React from "react";
+import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useChat } from "../hooks/use-chat";
 import ChatInputForm from "../form/chat-input-form";
@@ -21,11 +21,15 @@ const Chat: React.FC = () => {
     endStreaming,
   } = useChat(chatId);
 
+  useEffect(() => {
+    window.document.title = "Chat - Week Plan";
+  }, []);
+
   if (isLoading) {
     return <Loader />;
   }
 
-  if (weeks.length === 0) {
+  if (weeks.length === 0 && !isLoading) {
     return <EmptyState />;
   }
 
@@ -33,7 +37,6 @@ const Chat: React.FC = () => {
     <div className=" bg-gray-50">
       {/* Header */}
       <ChatHeader />
-
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
         {/* Messages */}

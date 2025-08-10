@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/auth-context";
 import toast from "react-hot-toast";
@@ -12,6 +12,14 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isSignUp) {
+      window.document.title = "Sign Up | Week Plan Chat";
+    } else {
+      window.document.title = "Login | Week Plan Chat";
+    }
+  }, [isSignUp]);
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();

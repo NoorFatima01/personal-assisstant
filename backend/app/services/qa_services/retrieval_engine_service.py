@@ -1,5 +1,6 @@
 from langchain_core.runnables import RunnableMap, RunnableLambda, RunnablePassthrough
 from app.utils.qa_utils import create_search_filter
+from typing import List
 
 class RetrievalEngine:
     def __init__(self, vectorstore, k: int, allow_fallback: bool = True):
@@ -10,9 +11,9 @@ class RetrievalEngine:
     def as_runnable(self):
         def retrieve(inputs):            
             try:
-                question = inputs["question"]
-                week_start = inputs.get("week_start", None)
-                classification = inputs.get("classification", "personal")
+                question: str = inputs["question"]
+                week_start: List[str] = inputs.get("week_start", None) # will be an array
+                classification: List[str] = inputs.get("classification", ["personal"]) # will be an array
 
                 filter = create_search_filter(classification, week_start)
 

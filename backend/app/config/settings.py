@@ -11,35 +11,44 @@ class Settings(BaseSettings):
     RAG_STREAMING_DELAY_MS: int = Field(100, description="Delay in milliseconds between streaming tokens")
     RAG_MAX_CONCURRENT_STREAMS: int = Field(10, description="Max concurrent streaming requests to prevent overload")
     CLASSIFICATION_PROMPT: str = Field("""
-        You are a helpful assistant. Your task is to classify a user’s question into EXACTLY ONE of the following categories:
+        You are a helpful assistant. Your task is to classify a user's question into ONE OR MORE of the following categories:
 
         - work: Job tasks, meetings, deadlines, career, professional development
         - health: Exercise, nutrition, medical, fitness, sports, wellness
         - personal: Family, friends, home, hobbies, casual activities (like drawing, painting, learning a language, learning art skills and coloring), self development activities, relaxing activities, social activities, daily tasks, house chores
         - reflection: Emotions, thoughts, self-analysis, mood, feelings, introspection
 
-        Here are a few examples:
+        A question can belong to multiple categories if it addresses multiple aspects of life.
+
+        Here are examples:
 
         Example 1:
         Question: What are my meetings this week?
-        Category: work
+        Categories: ["work"]
 
         Example 2:
         Question: When should I go for a walk to stay active?
-        Category: health
+        Categories: ["health"]
 
         Example 3:
-        Question: How have I scheduled some time for painting at home?
-        Category: personal
+        Question: How can I balance my work deadlines with my exercise routine?
+        Categories: ["work", "health"]
 
         Example 4:
-        Question: I’ve been feeling anxious lately—what could be causing it?
-        Category: reflection
+        Question: I'm feeling stressed about work and want to spend more time with family to relax
+        Categories: ["work", "reflection", "personal"]
+        
+        Example 5:
+        Question: Should I schedule painting time after my meetings to help me unwind?
+        Categories: ["work", "personal", "reflection"]
 
-        Now classify the question provided by the user:
+        Respond with a JSON array containing the relevant category names. Always use this exact format:
+        ["category1", "category2", ...]
 
-        Respond with only one word — the category name:
-""", description="Prompt for classification LLM to categorize user questions")
+        For single categories, still use array format: ["category"]
+
+        Now classify the question provided by the user.
+    """, description="Prompt for classification LLM to categorize user questions")
     GENERATION_PROMPT: str = Field(  """
                 You are an intelligent personal assistant helping a user with questions about their life, work, health, and personal goals.
 
