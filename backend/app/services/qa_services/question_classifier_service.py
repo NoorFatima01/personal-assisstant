@@ -52,10 +52,6 @@ class QuestionClassifier:
             # Parse categories
             categories = self._parse_categories(response_text)
             
-            print(f"Question: {question}")
-            print(f"LLM Response: {response_text}")
-            print(f"Parsed Categories: {categories}")
-            
             return categories
 
         except Exception as e:

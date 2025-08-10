@@ -60,7 +60,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --reload-dir app
 
 #running celery
-celery -A app.config.celery_app.celery_app worker --loglevel=info
+celery -A app.config.celery_app.celery_app worker --beat --loglevel=info
 
 # Frontend setup
 cd frontend
@@ -96,3 +96,7 @@ docker stop redis-server
 docker start redis-server
 ```
 
+--- 
+## 📈 Improvements
+1. Put a limit on number of messages in a single chat.
+2. Use langchain-qdrant package instead of qdrant package for better integration.
