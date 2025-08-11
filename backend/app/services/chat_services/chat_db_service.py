@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, List
+from typing import Optional, List
 from app.config.supabase_client import supabase
 from fastapi import HTTPException
 

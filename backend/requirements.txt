@@ -4,10 +4,11 @@ pydantic==2.5.0
 pydantic-settings==2.1.0
 python-multipart==0.0.6
 supabase
-langchain
-langchain-community
 pypdf
 qdrant-client
 redis
 qdrant-client
 celery
+langchain
+langchain-groq
+sentence-transformers

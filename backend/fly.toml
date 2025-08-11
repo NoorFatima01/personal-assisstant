@@ -1,0 +1,43 @@
+# fly.toml app configuration file generated for week-plan-chat on 2025-08-11T00:16:57+05:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'week-plan-chat'
+primary_region = 'sin'
+
+[build]
+  dockerfile = 'Dockerfile'
+
+[env]
+  PYTHONPATH = '/app'
+
+[processes]
+  app = 'uvicorn app.main:app --host 0.0.0.0 --port 8080'
+  worker = 'celery -A app.config.celery_app.celery_app worker --loglevel=info'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "suspend"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ['app']
+
+[[vm]]
+  size = 'shared-cpu-1x'
+  memory = '2gb'
+  processes = ['app']
+
+[[vm]]
+  size = 'shared-cpu-1x'
+  memory = '2gb'
+  processes = ['worker']
+
+
+# [[vm]]
+#  size = 'shared-cpu-1x'
+#  memory_mb = 256
+#  processes = ['beat']
+
+# beat = 'celery -A app.config.celery_app.celery_app beat --loglevel=info'

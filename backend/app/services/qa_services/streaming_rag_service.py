@@ -1,18 +1,15 @@
-import asyncio
 from operator import itemgetter
-import time
-from typing import Any, AsyncGenerator, Dict, List, Tuple
-from langchain_core.runnables import RunnableMap, RunnableLambda, RunnablePassthrough, RunnableParallel
+from typing import AsyncGenerator, List
+from langchain_core.runnables import RunnableParallel
 from app.config.qdrant_client import get_user_vector_store
 from app.config.settings import get_settings
-from app.utils.exception import RetrievalException, RAGException, GenerationException, ClassificationException
 from .question_classifier_service import QuestionClassifier
 from .retrieval_engine_service import RetrievalEngine
 from .response_generator_service import ResponseGenerator
 from app.config.model_loader import get_llm_manager
 from app.services.chat_services.chat_db_service import ChatDBService
-from app.utils.redis_cache import RedisCache
-from app.config.redis_client import redis_client
+# from app.utils.redis_cache import RedisCache
+# from app.config.redis_client import redis_client
 
 
 #  TODO: change this incorporate multiple classification categories
@@ -39,7 +36,7 @@ class RAGService:
     
     def __init__(self):
         self.config = RAGConfig()
-        self.redis_cache = RedisCache(redis_client)
+        # self.redis_cache = RedisCache(redis_client)
         
         # Stats tracking
         # self.stats = {

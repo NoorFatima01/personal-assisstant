@@ -1,10 +1,11 @@
+import os
 from celery import Celery
 
 # Redis is running locally on port 6379, using DB 0
 celery_app = Celery(
     "worker",
-    broker="redis://localhost:6379/0",  # Redis as broker
-    backend="redis://localhost:6379/1"  # for result storage
+    broker=os.getenv("REDIS_BROKER_URL"),  # Redis as broker
+    backend=os.getenv("REDIS_BACKEND_URL")  # for result storage
 )
 
 celery_app.conf.update(

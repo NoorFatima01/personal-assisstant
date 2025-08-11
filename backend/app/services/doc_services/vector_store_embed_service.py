@@ -1,5 +1,5 @@
 from typing import Tuple, List
-from langchain_community.document_loaders import PyPDFLoader
+from langchain.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from app.config.qdrant_client import get_user_vector_store
 

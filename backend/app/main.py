@@ -9,7 +9,7 @@ from app.routes.chat import router as chat_router
 from app.utils.exception import http_exception_handler
 from app.utils.exception import rag_exception_handler, RAGException
 
-app = FastAPI(title="FastAPI + Supabase Auth API", version="1.0.0")
+app = FastAPI(title="Week Plan Chat", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,

@@ -1,6 +1,5 @@
 from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnableMap
 from langchain_core.runnables import RunnableLambda
 from app.services.chat_services.chat_db_service import ChatDBService
 

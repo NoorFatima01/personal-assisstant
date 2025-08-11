@@ -1,8 +1,8 @@
 import os
 from dotenv import load_dotenv
 from qdrant_client import QdrantClient
-from langchain_community.vectorstores import Qdrant as QdrantStore
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain.vectorstores import Qdrant as QdrantStore
+from langchain.embeddings import HuggingFaceEmbeddings
 from qdrant_client.models import VectorParams
 from qdrant_client.models import PayloadSchemaType
 from qdrant_client.models import OptimizersConfigDiff
