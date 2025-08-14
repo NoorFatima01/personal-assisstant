@@ -2,7 +2,7 @@
 *A LangChain + RAG-based web app to chat with your weekly goals.*
 
 ## 📌 Overview
-**Week Plan Chat** is an AI-powered weekly planner that allows users to upload their weekly goal PDFs — categorized as **Work**, **Personal**, and **Health** — and interact with them using natural language queries.  
+**Week Plan Chat** is an AI-powered weekly planner that allows users to upload their weekly goal PDFs categorized as **Work**, **Personal**, and **Health**. Users can interact with them using natural language queries.  
 The app uses **LangChain** and **RAG (Retrieval-Augmented Generation)** to fetch relevant context from uploaded documents and answer questions conversationally.
 
 **Key Features:**
@@ -100,3 +100,4 @@ docker start redis-server
 ## 📈 Improvements
 1. Put a limit on number of messages in a single chat.
 2. Use langchain-qdrant package instead of qdrant package for better integration.
+
